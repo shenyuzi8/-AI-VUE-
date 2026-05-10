@@ -1,0 +1,19 @@
+{
+  "name": "ai-chat-server",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^4.19.2",
+    "mysql2": "^3.9.7",
+    "cors": "^2.8.5",
+    "nodemailer": "^6.9.13",
+    "dotenv": "^16.4.5",
+    "jsonwebtoken": "^9.0.2",
+    "axios": "^1.6.8",
+    "gpt-tokenizer": "^2.1.2"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  }
+}
