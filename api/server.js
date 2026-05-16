@@ -102,6 +102,7 @@ async function generateConversationTitle(model, userFirstMessage) {
 }
 
 //数据库初始化-这里我建议使用虚拟机里的数据库，不要用到生产环境里的数据库了。
+//数据库初始化-这里我建议使用虚拟机里的数据库，不要用到生产环境里的数据库了。
 async function initDatabase() {
   const connection = await mysql.createConnection({
     host: process.env.DB_HOST,
@@ -158,12 +159,13 @@ async function initDatabase() {
         FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
 
+      // ✅ 修复：不再硬编码默认值
       `CREATE TABLE IF NOT EXISTS system_config (
         id INT PRIMARY KEY AUTO_INCREMENT,
-        smtp_host VARCHAR(100) DEFAULT 'smtp.qq.com',
-        smtp_port INT DEFAULT 465,
-        smtp_email VARCHAR(100) DEFAULT '3107318337@qq.com',
-        smtp_auth_code VARCHAR(255) DEFAULT 'kpcrpldgofxdddga',
+        smtp_host VARCHAR(100),
+        smtp_port INT,
+        smtp_email VARCHAR(100),
+        smtp_auth_code VARCHAR(255),
         money_to_points INT DEFAULT 10 COMMENT '1元兑换点数',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
@@ -184,9 +186,18 @@ async function initDatabase() {
       await connection.query(sql);
     }
 
+    // 从 .env 读取并插入初始配置
     const [config] = await connection.query('SELECT id FROM system_config WHERE id = 1');
     if (config.length === 0) {
-      await connection.query('INSERT INTO system_config (id) VALUES (1)');
+      await connection.query(
+        'INSERT INTO system_config (id, smtp_host, smtp_port, smtp_email, smtp_auth_code) VALUES (1, ?, ?, ?, ?)',
+        [
+          process.env.SMTP_HOST,
+          process.env.SMTP_PORT,
+          process.env.SMTP_EMAIL,
+          process.env.SMTP_AUTH_CODE
+        ]
+      );
     }
 
     const [admin] = await connection.query('SELECT id FROM users WHERE email = ?', ['admin@admin.com']);
